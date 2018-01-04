@@ -1,0 +1,39 @@
+#!/usr/bin/python
+
+import os
+import sys
+
+tags = ['movie', 'tvshow', 'musicvideo']
+
+if sys.argv[1] == tags[1] and len(sys.argv) != 4:
+	print 'Ukoliko se koristi TV Show potrebn je treci argument koji predstavlja ime serije'
+	exit()
+
+if sys.argv[1] not in tags:
+	print 'Netacan tag, ili nije dozvoljen, ukoliko tag ne postoji, dodati u tags listu'
+	exit()
+
+if not os.path.isdir(sys.argv[2]):
+	print 'Drugi argument skripte mora biti direktorijum koji postoji'
+	exit()
+
+def tag(tag_type, content):
+	return 	'<' + tag_type + '>' + '\n' +   \
+			content + '\n' +                \
+			'</' + tag_type + '>'
+
+def title_tag(contents):
+	return tag('title', contents)
+
+def write_content_to_file(file, content, mode='w'):
+	f = open(file, mode)
+	f.write(content)
+
+def create_xml(file_type, title):
+	return '<?xml version ="1.0" encoding = "utf-8"?>' + '\n' + tag(file_type, title_tag(title))
+
+tag_type = sys.argv[1] if sys.argv[1] != tags[1] else 'episodedetails'
+
+[write_content_to_file(os.path.join(sys.argv[2], file.split('.')[0] + '.nfo'), create_xml(tag_type, file.split('.')[0])) for file in os.listdir(sys.argv[2])]
+if sys.argv[1] == tags[1]:
+	write_content_to_file(os.path.join(sys.argv[2], 'tvshow.nfo'), create_xml('tvshow', sys.argv[3]))
